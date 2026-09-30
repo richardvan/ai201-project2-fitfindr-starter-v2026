@@ -19,5 +19,9 @@ env/
 .DS_Store
 Thumbs.db
 
+# Personal study notes, not part of the submission
+MILESTONE_PLAN.md
+AI201 L3*.pdf
+
 # NOTE: results/ is deliberately NOT ignored. Your run logs are evidence that
 # the test actually happened, and they're part of what gets graded. Commit them.
