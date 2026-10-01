@@ -20,12 +20,46 @@ That last line is what your loop branches on. "Returns a list" earns nothing —
 the description has to say what is *in* the list.
 """
 
+import re
+
 import config  # noqa: F401 — you'll use this in search_listings
 from generate import generate
 from utils.data_loader import load_listings
 
 
 # ── Tool 1: search_listings ───────────────────────────────────────────────────
+
+
+########
+## the following functions are to build a better agent
+
+# (about the project) FitFinder will search for outfits that match our fit
+# the stop words are useless words used in everyday speech, they are noise, not useful for the search it
+_STOPWORDS = {"a", "an", "the", "and", "or", "but", "if", "then", "else", "for", "on", "in", "with", "to", "of", "at", "by", "from"}
+
+# here we keep keywords and convert them into lower, it removes the stopwords, also turns string into lowercase
+def _keywords(text: str) -> set[str]:
+    """ Lowercase words worth matching on, stopwords removed."""
+    words = re.findall(r"[a-z0-9']+", (text or "").lower())
+    return {w for w in words if w not in _STOPWORDS and len(w) > 1}
+
+# here, we figure out the clothing sizes (e.g. W32 L30 for pants), this is filtered out
+# (e.g.) searching for a "Large jacket", adding "L", "waist size"...this will pull out the size_tokens from the search;
+def _size_tokens(size: str) -> set[str]:
+    cleaned = re.sub(r"\([^)]*\)", " ", size or "")  # parentheticals
+    parts = [p.strip().upper() for p in cleaned.split("/")]
+    return {p for p in parts if p}
+
+# we want to make sure the listing size satisfies the requested size (look for a size match
+def _size_matches(wanted: str, listing_size: str) -> bool:
+    if not wanted:
+        return True
+    listing_tokens = _size_tokens(listing_size)
+    if any(token.startswith("ONE SIZE") for token in listing_tokens):
+        return True
+    return bool(_size_tokens(wanted) & listing_tokens)
+
+
 
 def search_listings(
     description: str,
