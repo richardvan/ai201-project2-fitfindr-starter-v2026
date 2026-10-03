@@ -97,9 +97,9 @@
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** Regex, in `agent.py::_parse_query`. A `size X` pattern pulls out the size, a `$X` pattern pulls out the price ceiling, and whatever text is left (minus the word "under") becomes the description.
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** `parsed` → `search_results` → `selected_item` → `outfit_suggestion` → `fit_card`, or `error` if the run stops early after `search_results`.
 
 ---
 
@@ -113,8 +113,32 @@
 **One full query**
 
 ```
-$ python app.py ask '...'
+$ python app.py ask 'vintage graphic tee under $30'
 
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   Here are 2 outfit ideas that pair the new **Y2K Baby Tee — Butterfly Print** with pieces already in your wardrobe:
+
+### Outfit 1: Classic Y2K Contrast (Casual & Edgy)
+* **Top:** Y2K Baby Tee — Butterfly Print
+* **Bottoms:** Baggy straight-leg jeans, dark wash
+* **Outerwear:** Vintage black denim jacket (worn open)
+* **Shoes:** Chunky white sneakers
+* **Accessories:** Black crossbody bag
+
+**Why it works:** The ultra-slim, fitted silhouette of the baby tee creates a great proportion play when paired with your high-waisted, baggy dark-wash jeans (the ultimate 2000s combo). Layering the slightly cropped black denim jacket on top adds texture and ties into the black accents of the tee, while the chunky white sneakers finish the retro streetwear look.
+
+---
+
+### Outfit 2: Elevated Retro-Neutral (Smart-Casual)
+* **Top:** Y2K Baby Tee — Butterfly Print
+* **Bottoms:** Wide-leg khaki trousers
+* **Accessories:** Brown leather belt + Black crossbody bag
+* **Shoes:** Black combat boots
+
+**Why it works:** Tucking the butterfly baby tee into your wide-leg khaki trousers instantly balances fitted and loose proportions for a chic, effortless silhouette. Cinching the look with your brown leather belt adds a nice contrast against the tan trousers, and grounding the outfit with black combat boots adds an unexpected edge that keeps it from looking too plain.
+
+  Fit card: Found the ultimate butterfly print Y2K baby tee on Depop for just $18 and I'm literally obsessed. Styled it with some baggy dark denim and chunky sneakers today for the dreamiest 2000s streetwear fit. 🦋✨
 ```
 
 **The three tools, tested one at a time**
