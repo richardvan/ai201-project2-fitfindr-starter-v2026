@@ -41,7 +41,7 @@
 
 <!-- Three or four sentences: what a user asks for, and what they get back. -->
 
-
+FitFindr helps someone shopping secondhand turn a plain-language request, like "vintage graphic tee under $30," into a complete recommendation. It searches real thrift listings for a match, suggests an outfit that pairs the find with pieces already in the user's wardrobe, and writes a short caption someone could actually post about it. If nothing matches the request, it says so and suggests what to change instead of guessing.
 
 ---
 
@@ -183,15 +183,15 @@ The hunt is finally over and my crisp white sneakers have found their soulmate. 
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Help checking my acceptance criteria during Milestone 3, to see if they were actually testable.
+- *What came back:* My first draft of the state criterion didn't say which argument it was comparing, and had no rate attached.
+- *What I changed:* Rewrote it to name the exact comparison and added "5 of 5 tries."
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* A commit for the search helper functions I'd drafted.
+- *What came back:* Claude found that `_keywords`, `_size_tokens`, and `_size_matches` had a few bugs and wouldn't actually run.
+- *What I changed:* Fixed the bugs before committing, so the functions worked.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
