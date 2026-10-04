@@ -28,6 +28,7 @@ tool calls and returns a fit card — in at least 4 of 5 tries.
 <!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
      "my search is a plain keyword match and some phrasings will miss" is a
      real answer. -->
+My search is a plain keyword match, not a smart one. Some real phrasings of a query won't share enough words with a listing's title, description, or tags to score above zero, even when a matching item exists. That's why this isn't 5 of 5.
 
 ---
 
