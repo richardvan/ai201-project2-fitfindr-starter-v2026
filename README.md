@@ -275,19 +275,47 @@ that produced it:
 **Happy path**
 
 ```
-
+$ python app.py ask 'denim jacket under $50' --empty-wardrobe --trace
+(running with an empty wardrobe)
+[1] parse_query
+      in:  denim jacket under $50
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 7 items: Denim Jacket — Light Wash, Cropped, Vintage Levi's 501 Jeans — Medium Wash, 90s Track Jacket — Navy/White Stripe … +4 more
+      →    7 match(es)
+[3] select_item
+      out: Denim Jacket — Light Wash, Cropped ($42.0, poshmark)
+[4] suggest_outfit
+      in:  Denim Jacket — Light Wash, Cropped ($42.0, poshmark)
+      out: A light-wash cropped denim jacket is a versatile wardrobe staple that pairs effortlessly with high-waisted wid…
+      →    0 wardrobe item(s)
+[5] create_fit_card
+      in:  Denim Jacket — Light Wash, Cropped ($42.0, poshmark)
+      out: Scored this light-wash cropped denim jacket on Poshmark for just $42 and I'm officially obsessed. The boxy fit…
 ```
 
 **Empty search**
 
 ```
+$ python app.py ask 'designer ballgown size XXS under $5' --trace
+[1] parse_query
+      in:  designer ballgown size XXS under $5
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+      →    0 match(es)
+[3] branch
+      →    search returned []: stopping before suggest_outfit
 
+  Nothing in the listings matched description 'designer ballgown', size XXS, under $5.
+Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'; drop the size, or try a neighbouring one; raise the price ceiling above $5.
 ```
 
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
+The empty-search trace stops at step 3, before `suggest_outfit` or `create_fit_card` ever run — visibly shorter than the happy path's 5 steps, which is the proof the branch is actually doing something.
+
+**On the MCP move:** `run_agent` now calls `search_listings` through `mcp_client.call_tool` instead of importing and calling the function directly, with a fallback to the direct call if the MCP server can't be reached. Nothing behaved differently afterward — the same query returns the same top-ranked listing either way. The one thing MCP did surface: the tool's published description in `mcp_server.py` claimed it searched `brand` and `colors` and broke price ties by cheapest-first, neither of which the actual implementation does. Writing the tool's contract out separately from its code, for an audience that can't see the implementation, is what caught that mismatch.
 
 
 
