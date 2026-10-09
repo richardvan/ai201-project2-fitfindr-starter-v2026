@@ -16,6 +16,14 @@ own criteria need — these are a starting point, not a fixed set.
 SCENARIOS = [
     {
         # A query the data can match. Criterion 1.
+        #
+        # ⚠️ This scenario alone under-tests the criterion: run_eval.py repeats
+        # this one query 5 times, and search_listings is deterministic, so it
+        # never exercises the phrasing-variance risk the 4/5 target exists
+        # for (see README Verdicts and Diagnoses). The real criterion-1 check
+        # for the "after" run uses 5 different matching queries directly,
+        # the same way criterion 4 is handled below. This entry is kept for
+        # a quick smoke-test of the tool chain, not as criterion 1's evidence.
         "name": "matching query completes",
         "query": "vintage graphic tee under $30",
         "wardrobe": "example",

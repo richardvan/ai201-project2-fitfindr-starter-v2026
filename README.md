@@ -368,24 +368,33 @@ The empty-search trace stops at step 3, before `suggest_outfit` or `create_fit_c
 
      `python run_eval.py --label after` -->
 
-**What I changed:**
+**What I changed:** Not the agent's code — the *test* for criterion 1. The old check ran the same query, `'vintage graphic tee under $30'`, five times through `run_eval.py`. The new check runs 5 genuinely different matching queries (`'vintage graphic tee under $30'`, `'90s track jacket in size M'`, `'silk slip dress in midi length under $40'`, `'platform sneakers size 8'`, `'denim jacket under $50'`) directly through `agent.py::run_agent`, each selecting a different real item.
 
-**Which failure it was meant to fix:**
+**Which failure it was meant to fix:** Not a code failure — a measurement gap, diagnosed in Milestone 4. `search_listings` is deterministic, so repeating one query 5 times could never actually exercise the phrasing-variance risk the 4/5 target was written for. The old MET (5/5) was true but weak evidence.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools (5 different queries) | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before the second tool | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Item in session matches item passed to suggest_outfit | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Fit card mentions the item's actual price | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Price ceiling respected by every returned listing | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Did it help, and how do I know:**
+Full output: `results/run_2026-10-08_2010_after.md` (criteria 2, 3, 5, plus a smoke-test of criterion 1's old scenario). Criterion 1's real evidence this time:
 
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
+```
+Try 1: PASS | query='vintage graphic tee under $30'              | item=Y2K Baby Tee — Butterfly Print
+Try 2: PASS | query='90s track jacket in size M'                 | item=90s Track Jacket — Navy/White Stripe
+Try 3: PASS | query='silk slip dress in midi length under $40'   | item=90s Silk Slip Dress — Floral, Midi Length
+Try 4: PASS | query='platform sneakers size 8'                   | item=Platform Sneakers — White Chunky Sole
+Try 5: PASS | query='denim jacket under $50'                     | item=Denim Jacket — Light Wash, Cropped
+```
+
+Note: try 4 hit the 15-requests-per-minute limit mid-run — the adapter paused 7s, then 60s, and retried automatically. That's the rate limiter doing its job, not a failure.
+
+**Did it help, and how do I know:** The raw number didn't move — still 5/5, still MET. What changed is whether I can trust that number. Before, 5/5 came from one query that could only ever select one item, so it couldn't have failed from a phrasing miss even if my search genuinely had that weakness. After, 5/5 comes from 5 different real phrasings selecting 5 different items, which is the actual scenario the 4/5 target was written to guard against — and all 5 still passed. So this run gives me real confidence that `search_listings` handles a reasonable spread of query phrasing, rather than confidence built on a test that couldn't have told me otherwise. If I had to guess why none of the 5 missed: the test queries are still fairly literal matches to each item's title/style_tags (e.g. "90s track jacket" → a listing literally titled "90s Track Jacket"), so the real edge case — an indirect or synonym-heavy phrasing — still hasn't been tried. That's named honestly under What's Still Broken below.
 
 
 
