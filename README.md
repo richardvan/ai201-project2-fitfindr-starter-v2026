@@ -284,15 +284,19 @@ A note on this run: the first two attempts at `run_eval.py` hit a real `503 UNAV
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Matching query completes all three tools | 4 of 5 | MET (5/5), but see note below | 5 of 5 tries completed with a fit card, which clears the 4/5 bar on paper — but see the diagnosis underneath before trusting this one |
+| 2 | Impossible query stops before the second tool | 5 of 5 | MET (5/5) | All 5 tries stopped at the branch with the error message set and `suggest_outfit` never called (confirmed via the trace, which ends at step `branch`) |
+| 3 | Item in session matches item passed to suggest_outfit | 5 of 5 | MET (5/5) | All 5 tries: `session["selected_item"]["id"]` equaled `session["search_results"][0]["id"]`, and the same dict is what `run_agent` passes into `suggest_outfit`/`create_fit_card` — no copy is ever made |
+| 4 | Fit card mentions the item's actual price | 4 of 5 | MET (5/5) | Called `create_fit_card` directly on 5 different listings; every caption included that item's real price string |
+| 5 | Price ceiling respected by every returned listing | 5 of 5 | MET (5/5) | All 5 tries returned the same 7 listings from `search_listings`, and every one of their prices was ≤ $50 |
 
 **Diagnoses**
 
+No criterion missed its target this run, so there's no tool/branch/session/model failure to trace. But "nothing missed" isn't the same as "nothing to say" — criterion 1 deserves a second look before taking its MET at face value.
 
+**Criterion 1's test didn't actually test what the target was written to protect against.** The 4/5 target exists because plain keyword matching can miss a real match on an unlucky phrasing — that's the risk named in `criteria.md`'s own "why." But the scenario in `scenarios.py` runs the *same* query, `'vintage graphic tee under $30'`, five times. `search_listings` is deterministic, so all 5 tries hit the identical search result; the only thing that could vary between tries is the wording `suggest_outfit` and `create_fit_card` generate, and neither of those has a failure path that a bad search phrasing would ever trigger. The one real failure this run hit — a `503` from the model provider — is external and has nothing to do with phrasing either. So a MET here mostly proves the model-calling path is stable, not that the search tolerates varied phrasing 4 times out of 5. This isn't a bug in the agent; it's a gap in how the scenario was designed to measure the criterion.
+
+**The fix, next time:** replace the single repeated query in criterion 1's scenario with 5 *different* matching queries (e.g. pulled from `python app.py examples`), so a phrasing that the keyword scorer actually fails on has a chance to show up as a real FAIL instead of being invisible to the test.
 
 ---
 
