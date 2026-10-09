@@ -35,18 +35,30 @@ SCENARIOS = [
         "wardrobe": "empty",
         "criterion": None,
     },
-    # TODO: add what your criteria 3, 4 and 5 need.
-    #
-    # Set "criterion" to the number in criteria.md that the scenario tests.
-    # "criterion": None means a diagnostic run — useful to have, but it isn't
-    # one of your five, and run_eval.py marks it as such in the table.
-    #
-    # For a state criterion, any normal query works — what you're checking is
-    # what ends up in the session, not what the user typed.
-    #
-    # For a fit-card criterion, you probably want the SAME query listed more
-    # than once, or several different items, depending on what your criterion
-    # actually says.
+    {
+        # A matching query, run 5 times. Criterion 3 — state: the item found
+        # in search_results is the same item (by id) passed to suggest_outfit
+        # and create_fit_card. This is deterministic (no model call picks the
+        # item), so any matching query works.
+        "name": "state matches through the session",
+        "query": "platform sneakers size 8",
+        "wardrobe": "example",
+        "criterion": 3,
+    },
+    {
+        # A query with a real price ceiling. Criterion 5 — every listing
+        # search_listings returns must have a price at or under that ceiling.
+        "name": "price ceiling respected",
+        "query": "denim jacket under $50",
+        "wardrobe": "example",
+        "criterion": 5,
+    },
+    # Criterion 4 (the fit card mentions the item's price, across 5 DIFFERENT
+    # listings) isn't tested here. run_eval.py repeats one scenario's query,
+    # which always selects the same top-ranked item — it can't produce 5
+    # different listings on its own. That criterion is tested directly with
+    # create_fit_card() on 5 different items instead; see the README's Run
+    # Log for that output.
 ]
 
 WARDROBES = ("example", "empty")

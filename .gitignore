@@ -23,5 +23,8 @@ Thumbs.db
 MILESTONE_PLAN.md
 AI201 L3*.pdf
 
+# Claude Code's own local tool settings, not part of the submission
+.claude/
+
 # NOTE: results/ is deliberately NOT ignored. Your run logs are evidence that
 # the test actually happened, and they're part of what gets graded. Commit them.

@@ -213,18 +213,54 @@ The hunt is finally over and my crisp white sneakers have found their soulmate. 
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before the second tool | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Item in session matches item passed to suggest_outfit | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Fit card mentions the item's actual price | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Price ceiling respected by every returned listing | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Real output from one try**, pasted as text, naming the file and function
-that produced it:
+Produced by `run_eval.py` against `agent.py::run_agent` (criteria 1, 2, 3, 5) and a direct call to `tools.py::create_fit_card` (criterion 4, which needs 5 different items rather than 5 tries of the same query — see the note in `scenarios.py`). Full output: `results/run_2026-10-07_1838_before.md`.
 
+**Real output, one try per criterion:**
+
+Criterion 1 — `agent.py::run_agent`, query `'vintage graphic tee under $30'`:
+```
+Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+Outfit:   Here are 2 outfit ideas that pair the new Y2K Baby Tee — Butterfly Print with pieces already in your wardrobe: ...
+Fit card: Found the ultimate butterfly print Y2K baby tee on Depop for just $18 and I'm literally obsessed. Styled it with some baggy dark denim and chunky sneakers today for the dreamiest 2000s streetwear fit. 🦋✨
 ```
 
+Criterion 2 — `agent.py::run_agent`, query `'designer ballgown size XXS under $5'`:
 ```
+Nothing in the listings matched description 'designer ballgown', size XXS, under $5.
+Things to change: try broader words — 'jacket' finds more than 'cropped corduroy jacket'; drop the size, or try a neighbouring one; raise the price ceiling above $5.
+```
+
+Criterion 3 — `agent.py::run_agent`, query `'platform sneakers size 8'`:
+```
+session["selected_item"]["id"]: lst_019
+session["search_results"][0]["id"]: lst_019
+```
+Both come from the same dict — `run_agent` reads `session["selected_item"]` back out of the session to call `suggest_outfit` and `create_fit_card` (agent.py lines ~183-202), rather than a separate copy.
+
+Criterion 4 — `tools.py::create_fit_card`, called directly on `lst_001` ($38):
+```
+Still pinching myself over finding these Vintage Levi's 501 Jeans in the absolute best medium wash for just $38. They fit like a glove and instantly elevated my go-to everyday tee-and-sneakers combo. Huge shoutout to my favorite Depop seller for the ultimate closet staple!
+```
+
+Criterion 5 — `tools.py::search_listings`, query `'denim jacket'`, `max_price=50`:
+```
+lst_007 Denim Jacket — Light Wash, Cropped  42.0
+lst_001 Vintage Levi's 501 Jeans — Medium Wash  38.0
+lst_004 90s Track Jacket — Navy/White Stripe  45.0
+lst_016 High-Waisted Denim Shorts — Cutoff  24.0
+lst_032 Shacket — Olive Canvas  33.0
+lst_037 Straight Leg Black Jeans — Faded  30.0
+lst_038 Denim Vest — Medium Wash, Studded  27.0
+```
+All 7 returned listings are at or under $50.
+
+A note on this run: the first two attempts at `run_eval.py` hit a real `503 UNAVAILABLE` ("experiencing high demand") from the Gemini free tier partway through, which `agent.py`'s `ModelUnavailable` handler caught cleanly each time — no crash, no hang. That's unrelated to the agent's own correctness, so those two runs were discarded; the table above is from the third, clean run.
 
 ---
 
