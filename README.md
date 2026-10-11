@@ -193,6 +193,12 @@ The hunt is finally over and my crisp white sneakers have found their soulmate. 
 - *What came back:* Claude found that `_keywords`, `_size_tokens`, and `_size_matches` had a few bugs and wouldn't actually run.
 - *What I changed:* Fixed the bugs before committing, so the functions worked.
 
+**Moment 3**
+
+- *What I asked for:* To argue the opposite of my own MET verdict on criterion 1, as strongly as possible, using the criterion, target, five tries, and verdict I had already written.
+- *What came back:* The test couldn't actually have failed in the way the target was meant to guard against, since the same query ran five times and search is deterministic, so only the wording could vary, not whether a match was found.
+- *What I changed:* Replaced the one repeated query with five different matching queries, tested directly, so the test could catch a real search miss if one existed.
+
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 3.
@@ -405,6 +411,14 @@ Note: try 4 hit the 15-requests-per-minute limit mid-run — the adapter paused 
 <!-- For each criterion still missed: what you'd do, and why you stopped where
      you did. "I ran out of time" is fine if it's true. Pretending nothing is
      left is not. -->
+
+No criterion missed its numeric target this unit — all five are MET on the after-run. But "nothing missed" isn't the same as "nothing left," so here's the real gap I know about and stopped short of closing.
+
+**Criterion 1's test still under-exercises the actual risk.** The 5 queries I replaced the single repeated one with (`'vintage graphic tee under $30'`, `'90s track jacket in size M'`, `'silk slip dress in midi length under $40'`, `'platform sneakers size 8'`, `'denim jacket under $50'`) are all fairly literal matches to each listing's title or style tags. None of them test the case the 4/5 target was actually written to tolerate: a phrasing that describes an item accurately but shares no real keywords with it, like asking for a "vintage band shirt" when the listing is tagged "graphic tee" and "grunge" but never says "band." My plain keyword-overlap scorer in `search_listings` has no synonym handling at all, so I'd expect a query like that to genuinely score 0 and get dropped.
+
+What I'd do next: write 2-3 deliberately indirect queries for items already in the dataset, run them through `search_listings` directly, and see whether they actually fail. If they do, that's real evidence for the 4/5 target (rather than the 5/5 I've measured so far); if the keyword overlap is generous enough to still catch them, I'd know the target could honestly be tightened to 5/5.
+
+I stopped here because the unit's time budget was mostly spent getting the MCP move, the three failure modes, and the full run/diagnose/fix cycle done properly rather than iterating further on one criterion's test design. This is a known, named gap, not an unnoticed one.
 
 
 
